@@ -1,20 +1,24 @@
-require('dotenv').config()
-const express = require('express')
-const cors    = require('cors')
-const path    = require('path')
+require('dotenv').config();
 
-const validateAgent   = require('./agents/validateAgent')
-const researchAgent   = require('./agents/researchAgent')
-const peopleAgent     = require('./agents/peopleAgent')
-const outreachAgent   = require('./agents/outreachAgent')
-const trackingAgent   = require('./agents/trackingAgent')
-const conclusionAgent = require('./agents/conclusionAgent')
+const express = require('express');
+const cors    = require('cors');
+const path    = require('path');
 
-const app = express()
-app.use(cors())
-app.use(express.json())
-app.use(express.static(path.join(__dirname, '../client')))
+const validateAgent   = require('./agents/validateAgent');
+const researchAgent   = require('./agents/researchAgent');
+const peopleAgent     = require('./agents/peopleAgent');
+const outreachAgent   = require('./agents/outreachAgent');
+const trackingAgent   = require('./agents/trackingAgent');
+const conclusionAgent = require('./agents/conclusionAgent');
 
+const app = express();
+
+// ? ONLY ONE CORS
+app.use(cors({
+  origin: "*",
+}));
+
+app.use(express.json());
 app.post('/api/analyze', async (req, res) => {
   const { company, category } = req.body
   console.log('Received:', company, category)
