@@ -17,15 +17,15 @@ async function peopleAgent(company, category, searchContext) {
     messages: [
       {
         role: 'system',
-        content: `You are a production-grade B2B contact intelligence agent for StepOne.
+        content: `You are a production-grade B2B contact intelligence agent for Clientify, an AI sales GTM platform.
 Return ONLY valid JSON. No backticks. No explanation outside JSON.
 
 STRICT CONTACT INTELLIGENCE RULES:
 - ONLY include people who are CONFIRMED in the search results provided.
 - Use the EXACT job titles found in search results.
 - NEVER invent or guess people who are not mentioned in the search results.
-- Focus ONLY on marketing, brand, growth, and communications roles.
-- DO NOT include operations, finance, engineering, or unrelated executives.
+- Focus on these GTM roles: Founder, CEO, CTO, Marketing Head, Growth Lead, Partnerships Manager, Procurement Head.
+- DO NOT include unrelated roles.
 
 LINKEDIN URL RULES:
 - Always format as: https://linkedin.com/in/firstname-lastname
@@ -35,7 +35,7 @@ LINKEDIN URL RULES:
 EMAIL RULES:
 - Generate pattern-based email: firstname.lastname@companydomain.com
 - Use the most likely corporate domain for the company.
-- Mark email_confidence as "pattern-based" (not verified).
+- Mark email_confidence as "pattern-based" or "verified" based on data.
 - If company domain is unknown, set email to "Publicly unavailable".
 
 PHONE RULES:
@@ -50,17 +50,16 @@ DATA QUALITY:
       },
       {
         role: 'user',
-        content: `Find up to 3 current senior decision makers at "${company}" (${category}) that a brand and experiential marketing agency should contact.
+        content: `Find up to 3 current senior decision makers at "${company}" (${category}) that Clientify should target for GTM outbound sales.
 
-Only look for people in these roles:
-- Chief Marketing Officer or CMO
-- VP of Marketing or Vice President Marketing
-- Head of Marketing or Head of Brand
-- Brand Director or Marketing Director
-- Chief Growth Officer
-- Head of Digital Marketing
-- Head of Communications or PR
-- India/APAC Marketing Lead (if applicable)
+Target roles:
+- Founder or Co-Founder
+- CEO (Chief Executive Officer)
+- CTO (Chief Technology Officer)
+- Marketing Head or CMO (Chief Marketing Officer)
+- Growth Lead or VP Growth or Head of Sales
+- Partnerships Manager or Head of Partnerships
+- Procurement Head or VP Procurement
 
 REAL SEARCH RESULTS ABOUT THEIR LEADERSHIP:
 ${leaderSearch}
@@ -77,11 +76,16 @@ Return ONLY this JSON with no extra text:
     {
       "name": "real full name exactly as found in search results",
       "title": "their exact current job title from search results",
-      "relevance": "one specific sentence explaining why a brand/experiential marketing agency should contact this person and what brand decisions they control",
+      "relevance": "one specific sentence explaining why a GTM sales platform should target this person",
       "linkedin": "https://linkedin.com/in/firstname-lastname",
       "email": "firstname.lastname@companydomain.com",
       "email_confidence": "pattern-based",
-      "phone": "Publicly unavailable"
+      "phone": "Publicly unavailable",
+      "priority_ranking": 1,
+      "influence_score": 9,
+      "engagement_likelihood": "High",
+      "role_relevance_score": 8,
+      "verified_contact": "verified"
     }
   ]
 }`

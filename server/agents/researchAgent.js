@@ -87,7 +87,7 @@ async function researchAgent(company, category, searchContext) {
   // Overview and market
   console.log('   \u2192 Building overview...')
   const part1 = await askGroq(
-    `You are a production-grade brand intelligence analyst for StepOne.
+    `You are a production-grade market intelligence analyst for Clientify.
 Return ONLY valid JSON. No backticks. No markdown. No text before or after JSON.
 
 STRICT DATA QUALITY RULES:
@@ -116,7 +116,8 @@ Return ONLY this JSON. Use real information. Write "Publicly unavailable" for an
     "positioning": "their real tagline, mission statement, or brand positioning",
     "founded": "year founded",
     "hq": "headquarters city and country",
-    "revenue_scale": "annual revenue estimate with year, or Publicly unavailable"
+    "revenue_scale": "annual revenue estimate with year, or Publicly unavailable",
+    "website": "official company website URL, e.g. https://stripe.com, or Publicly unavailable"
   },
   "market": {
     "brand_perception": "2 specific sentences on how the market and public perceive ${company}",
@@ -161,7 +162,7 @@ For each competitor provide specific, differentiated information:
     `You are a brand activity researcher.
 Return ONLY valid JSON. No backticks. No text before or after JSON.
 Only include REAL campaigns and events from the last 12-24 months.
-NEVER write "not publicly reported" \u2014 describe what actually happened or write "Publicly unavailable".
+NEVER write "not publicly reported" — describe what actually happened or write "Publicly unavailable".
 Each activity must be a real, verifiable initiative.`,
 
     `List real campaigns, launches, and events by "${company}" in the last 12-24 months.
@@ -190,7 +191,8 @@ Return ONLY this JSON with real specific information:
       "name": "specific event name",
       "type": "conference, trade show, activation, sponsorship, etc.",
       "scale": "local or national or global",
-      "outcome": "what happened or what was announced"
+      "outcome": "what happened or what was announced",
+      "url": "official event page URL or Publicly unavailable"
     }
   ]
 }`

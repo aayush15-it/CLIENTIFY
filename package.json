@@ -1,5 +1,5 @@
 {
-  "name": "stepone-ai",
+  "name": "clientify-ai",
   "version": "1.0.0",
   "main": "server/index.js",
   "scripts": {

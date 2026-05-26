@@ -1,7 +1,7 @@
 async function trackingAgent(company) {
   const slug = company.toLowerCase().replace(/\s/g, '_')
   return {
-    pixel_url: `https://track.stepone.ai/open?cid=${slug}&uid={recipient_id}`,
+    pixel_url: `https://track.clientify.ai/open?cid=${slug}&uid={recipient_id}`,
     sequence: [
       { day: 0,  action: 'Send LinkedIn message + email simultaneously' },
       { day: 3,  action: 'If email opened but no reply — send a value-add follow up' },

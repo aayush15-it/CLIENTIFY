@@ -20,46 +20,46 @@ function safeParseJSON(text) {
   }
 }
 
-async function generateSingleOutreach(company, dm, research) {
-  const dmName      = dm.name || 'Marketing Head'
+async function generateSingleOutreach(company, dm, research, tone = 'professional') {
+  const dmName      = dm.name || 'GTM Lead'
   const firstName   = dmName.split(' ')[0] || 'there'
-  const campaign    = research?.activity?.[0]?.name || 'recent initiative'
+  const campaign    = research?.activity?.[0]?.name || 'recent expansion'
   const campaignDesc = research?.activity?.[0]?.description || ''
   const positioning = research?.overview?.positioning || ''
   const competitor  = research?.competitors?.[0]?.name || 'competitors'
   const marketShift = research?.market?.recent_shifts || ''
   const companyProper = company.charAt(0).toUpperCase() + company.slice(1)
 
-  const systemPrompt = `You are a senior B2B outreach strategist writing on behalf of StepOne, a brand and experiential marketing agency.
-Your job is to write a highly personalized cold outreach email and LinkedIn message targeting a specific decision maker.
+  const systemPrompt = `You are a senior GTM sales intelligence copywriter for Clientify, an AI-powered Go-To-Market (GTM) sales intelligence, database enrichment, and personalized outreach platform.
+Your job is to write a highly contextual, personalized cold email and LinkedIn message targeting a specific executive to pitch Clientify.
 You must return ONLY valid JSON matching the requested structure. No markdown backticks. No conversational filler.
 
-STEPONE CAPABILITIES TO REFERENCE:
-- Experiential marketing and immersive brand activations
-- Event storytelling and live campaign amplification
-- Product launch campaigns and go-to-market strategy
-- Employer branding and talent attraction campaigns
-- Strategic brand positioning and creative direction
-- Digital growth campaigns and social media strategy
-- Localized campaigns for India/APAC market entry
+CLIENTIFY VALUE PROPOSITIONS TO REFERENCE:
+- AI-driven automated GTM strategy & prospect discovery
+- Real-time stakeholder enrichment and tracking
+- Competitor weakness analysis and sales triggers capture
+- Hyper-personalized email/LinkedIn outreach generation
+- Live market activity monitors and pipeline growth automation
 
 STRICT OUTREACH QUALITY RULES:
 - NEVER write generic praise like "Congratulations on your success" or "We would love to work with you."
 - NEVER use robotic buzzword-heavy language.
-- ALWAYS reference the SPECIFIC campaign name and what it achieved.
-- ALWAYS connect StepOne capabilities to a SPECIFIC opportunity for the brand.
-- The outreach must sound like a real human strategist wrote it after studying the company.
+- ALWAYS reference the SPECIFIC company news/campaign: "${campaign}".
+- ALWAYS connect Clientify GTM tools to a SPECIFIC sales trigger or opportunity for their brand.
+- The outreach must sound like a real human growth strategist wrote it after studying the company.
 - LinkedIn message must be under 280 characters and end with a question.
 - Email subject must be under 10 words, specific, and intriguing.
 - Email body must be under 150 words with 3 paragraphs.
-- Sign off as: The StepOne Team
+- Sign off as: The Clientify Team
 
-TONE:
-- Strategic and consultative, not salesy.
-- Respectful and peer-level, not subservient.
-- Frame everything as opportunity, never mention weaknesses or risks directly.`
+TONE INSTRUCTIONS:
+Use the requested tone: "${tone}"
+- "professional": Corporate, authoritative, strategic, consultative, peer-level.
+- "startup": Friendly, innovative, casual, enthusiastic, conversational.
+- "enterprise": Formal, risk-conscious, value-driven, structured, ROI-focused.
+- "aggressive sales": Direct, high-impact, problem-solving, urgent, performance-oriented.`
 
-  const userPrompt = `Write highly personalized outreach for this specific senior person:
+  const userPrompt = `Write highly personalized GTM outreach for this specific stakeholder:
 
 Person details:
 - Full name: ${dmName}
@@ -68,43 +68,31 @@ Person details:
 - Company: ${companyProper}
 
 Real brand intelligence you MUST reference:
-- Their most recent campaign/initiative: "${campaign}"
-- What that initiative was about: "${campaignDesc}"
+- Their most recent activity/trigger: "${campaign}"
+- What that trigger was about: "${campaignDesc}"
 - Their brand positioning: "${positioning}"
 - Their main competitor: "${competitor}"
 - Recent market shifts: "${marketShift}"
 
-Instructions:
-
-LINKEDIN MESSAGE:
-- Start with Hi ${firstName}
-- Reference ${campaign} with one specific observation about what it signals about their brand direction
-- Connect to how StepOne can help amplify their next move through experiential marketing or campaign activation
-- End with a soft question
-- Must be under 280 characters
-
-EMAIL SUBJECT:
-- Must reference ${campaign} or ${companyProper} specifically
-- Must be intriguing, strategic, and under 10 words
-
-EMAIL BODY:
-- Paragraph 1: Open with a specific observation about ${campaign} and what it reveals about ${companyProper}'s brand direction. Show genuine understanding.
-- Paragraph 2: Introduce ONE specific StepOne capability (experiential activation, event storytelling, product launch campaign, employer branding) that directly connects to their current trajectory and helps them pull ahead of ${competitor}.
-- Paragraph 3: Soft CTA for a 15-minute call.
-- Sign off as: The StepOne Team
-- Total under 150 words.
-
-Return ONLY this JSON:
+Return ONLY this JSON structure:
 {
-  "linkedin_message": "the full linkedin message under 280 characters",
-  "email_subject": "the specific email subject line",
-  "email_body": "the full email body under 150 words with proper paragraphs"
+  "linkedin_message": "the full linkedin message under 280 characters matching the tone",
+  "email_subject": "the specific email subject line matching the tone",
+  "email_body": "the full email body under 150 words with proper paragraphs matching the tone",
+  "outreach_confidence": 92,
+  "intent_category": "Trigger-based Outbound" or "Competitor Weakness Capture" or "Product Launch GTM",
+  "suggested_cta": "suggested short call to action, e.g., '15-min GTM review'",
+  "tone": "${tone}"
 }`
 
   const defaults = {
     linkedin_message: '',
     email_subject: '',
-    email_body: ''
+    email_body: '',
+    outreach_confidence: 85,
+    intent_category: 'Trigger-based Outbound',
+    suggested_cta: '15-minute call',
+    tone: tone
   }
 
   try {
@@ -116,7 +104,7 @@ Return ONLY this JSON:
       ],
       response_format: { type: "json_object" },
       max_tokens: 800,
-      temperature: 0.6
+      temperature: 0.5
     })
 
     const text = res.choices[0]?.message?.content || ''
@@ -128,16 +116,16 @@ Return ONLY this JSON:
   }
 }
 
-async function outreachAgent(company, people, research) {
-  console.log(`   → Generating personalized outreach for all decision makers...`)
+async function outreachAgent(company, people, research, tone = 'professional') {
+  console.log(`   → Generating personalized outreach for all decision makers with tone: ${tone}...`)
   
   const dms = people?.decision_makers && people.decision_makers.length > 0
     ? people.decision_makers
-    : [{ name: 'Marketing Head', title: 'CMO', relevance: 'Brand decision maker' }]
+    : [{ name: 'GTM Lead', title: 'CMO', relevance: 'Sales decision maker' }]
 
   // Generate outreach for each decision maker in parallel
   const outreachPromises = dms.map(async (dm) => {
-    const outreach = await generateSingleOutreach(company, dm, research)
+    const outreach = await generateSingleOutreach(company, dm, research, tone)
     return {
       ...dm,
       outreach
