@@ -5,7 +5,8 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
 async function outreachAgent(company, people, research) {
   const dm          = people?.decision_makers?.[0] || { name: 'Marketing Head', title: 'CMO' }
-  const firstName   = dm.name.split(' ')[0]
+  const dmName      = dm.name || 'Marketing Head'
+  const firstName   = dmName.split(' ')[0] || 'Marketing Head'
   const campaign    = research?.activity?.[0]?.name || 'recent campaign'
   const campaignDesc = research?.activity?.[0]?.description || ''
   const positioning = research?.overview?.positioning || ''
@@ -85,15 +86,22 @@ Return ONLY this JSON with no extra text:
     temperature: 0.7
   })
 
+  const defaults = {
+    linkedin_message: '',
+    email_subject: '',
+    email_body: ''
+  };
   const text = res.choices[0]?.message?.content || ''
   try {
-    return JSON.parse(text)
+    const parsed = JSON.parse(text);
+    return { ...defaults, ...parsed };
   } catch(e) {
     const match = text.match(/\{[\s\S]*\}/)
-    return match ? JSON.parse(match[0]) : {
-      linkedin_message: '',
-      email_subject: '',
-      email_body: text
+    try {
+      const parsed = match ? JSON.parse(match[0]) : null;
+      return parsed ? { ...defaults, ...parsed } : { ...defaults, email_body: text };
+    } catch(e2) {
+      return { ...defaults, email_body: text };
     }
   }
 }

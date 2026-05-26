@@ -1,8 +1,8 @@
-require('dotenv').config();
+const path    = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
 const express = require('express');
 const cors    = require('cors');
-const path    = require('path');
 
 const validateAgent   = require('./agents/validateAgent');
 const researchAgent   = require('./agents/researchAgent');
@@ -10,6 +10,7 @@ const peopleAgent     = require('./agents/peopleAgent');
 const outreachAgent   = require('./agents/outreachAgent');
 const trackingAgent   = require('./agents/trackingAgent');
 const conclusionAgent = require('./agents/conclusionAgent');
+const discoverAgent   = require('./agents/discoverAgent');
 
 const app = express();
 
@@ -19,6 +20,42 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+app.post('/api/discover', async (req, res) => {
+  const { industry } = req.body
+  console.log('Received Industry Discovery:', industry)
+
+  if (!industry) {
+    return res.status(400).json({
+      success: false,
+      error: 'Please enter an industry'
+    })
+  }
+
+  if (industry.trim().length < 2) {
+    return res.status(400).json({
+      success: false,
+      error: 'Please enter a valid industry name'
+    })
+  }
+
+  try {
+    const result = await discoverAgent(industry)
+    res.json({
+      success: true,
+      industry,
+      prospects: result.prospects || [],
+      events: result.events || []
+    })
+  } catch(err) {
+    console.error('Discovery endpoint error:', err.message)
+    res.status(500).json({
+      success: false,
+      error: 'Something went wrong during discovery. Please try again.'
+    })
+  }
+})
+
 app.post('/api/analyze', async (req, res) => {
   const { company, category } = req.body
   console.log('Received:', company, category)

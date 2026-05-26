@@ -8,6 +8,8 @@ export default function DecisionMakers({ people, outreach }) {
   let peopleList = [];
   if (Array.isArray(people)) {
     peopleList = people;
+  } else if (people && Array.isArray(people.decision_makers)) {
+    peopleList = people.decision_makers;
   } else if (typeof people === 'object' && people !== null) {
     peopleList = Object.values(people);
   }

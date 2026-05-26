@@ -84,21 +84,28 @@ Based on ALL of this real data return ONLY this JSON:
     temperature: 0.4
   })
 
+  const defaults = {
+    verdict: 'Proceed With Caution',
+    confidence: 'Low',
+    pitch_score: 5,
+    summary: 'Insufficient data to make a strong recommendation.',
+    reasons_to_pitch: [],
+    reasons_to_be_cautious: [],
+    best_opportunity: '',
+    best_time_to_pitch: '',
+    recommended_first_step: ''
+  };
   const text = res.choices[0]?.message?.content || ''
   try {
-    return JSON.parse(text)
+    const parsed = JSON.parse(text);
+    return { ...defaults, ...parsed };
   } catch(e) {
     const match = text.match(/\{[\s\S]*\}/)
-    return match ? JSON.parse(match[0]) : {
-      verdict: 'Proceed With Caution',
-      confidence: 'Low',
-      pitch_score: 5,
-      summary: 'Insufficient data to make a strong recommendation.',
-      reasons_to_pitch: [],
-      reasons_to_be_cautious: [],
-      best_opportunity: '',
-      best_time_to_pitch: '',
-      recommended_first_step: ''
+    try {
+      const parsed = match ? JSON.parse(match[0]) : null;
+      return parsed ? { ...defaults, ...parsed } : defaults;
+    } catch(e2) {
+      return defaults;
     }
   }
 }
