@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ExternalLink, Mail, Users, Copy, Check, ShieldCheck, Globe, Star, Zap } from 'lucide-react';
+import { ExternalLink, Mail, Users, Copy, Check, ShieldCheck, Globe, Star, Zap, AlertCircle } from 'lucide-react';
 
 export default function DecisionMakers({ people, selectedDMIndex, setSelectedDMIndex, website }) {
   const [activeMessage, setActiveMessage] = useState({ index: null, type: null });
@@ -74,8 +74,10 @@ export default function DecisionMakers({ people, selectedDMIndex, setSelectedDMI
                 <div className="flex-grow">
                   <div className="flex items-center justify-between gap-1">
                     <h3 className="text-white font-bold text-sm group-hover:text-[#00D4FF] transition-colors">{person.name || 'Unknown Name'}</h3>
-                    {person.verified_contact === 'verified' && (
+                    {(person.verified === true || (person.verified === undefined && person.verified_contact === 'verified')) ? (
                       <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" title="Verified Contact" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0 animate-pulse" title="Unverified Profile" />
                     )}
                   </div>
                   <p className="text-xs text-[#00D4FF] font-semibold mt-0.5">{person.title || 'Key Stakeholder'}</p>
@@ -147,20 +149,62 @@ export default function DecisionMakers({ people, selectedDMIndex, setSelectedDMI
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                   </button>
-                </div>
 
-                <div className="flex gap-1.5">
-                  {person.linkedin && person.linkedin !== 'Publicly unavailable' && (
-                    <a 
-                      href={handleSafeLink(person.linkedin, `${person.name} LinkedIn`)}
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      onClick={(e) => e.stopPropagation()}
-                      className="p-1.5 bg-[#0077B5]/10 hover:bg-[#0077B5]/25 border border-[#0077B5]/20 rounded-md text-[#0077B5] transition-all"
-                      title="LinkedIn Profile"
-                    >
-                      <Zap className="w-3 h-3 fill-current" />
-                    </a>
+                  {/* LinkedIn Profile Action Button */}
+                  {person.linkedin && person.linkedin !== 'Publicly unavailable' ? (
+                    <div className="relative group/tooltip">
+                      <a 
+                        href={handleSafeLink(person.linkedin, `${person.name} LinkedIn`)}
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        onClick={(e) => e.stopPropagation()}
+                        className="p-2 bg-white/5 border border-white/5 rounded-lg text-slate-400 hover:bg-[#0077B5]/20 hover:border-[#0077B5]/30 hover:text-[#00D4FF] hover:shadow-[0_0_10px_rgba(0,212,255,0.4)] transition-all duration-200 flex items-center justify-center cursor-pointer"
+                      >
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          className="w-3.5 h-3.5"
+                        >
+                          <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                          <rect width="4" height="12" x="2" y="9" />
+                          <circle cx="4" cy="4" r="2" />
+                        </svg>
+                      </a>
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 bg-slate-900 border border-white/10 rounded-md text-[10px] font-bold text-white whitespace-nowrap opacity-0 pointer-events-none group-hover/tooltip:opacity-100 transition-opacity duration-200 shadow-xl z-30">
+                        Open LinkedIn Profile
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="relative group/tooltip">
+                      <button 
+                        disabled
+                        onClick={(e) => e.stopPropagation()}
+                        className="p-2 bg-white/5 border border-white/5 rounded-lg text-slate-600 cursor-not-allowed opacity-50 flex items-center justify-center"
+                      >
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          className="w-3.5 h-3.5"
+                        >
+                          <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                          <rect width="4" height="12" x="2" y="9" />
+                          <circle cx="4" cy="4" r="2" />
+                        </svg>
+                      </button>
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 bg-slate-900 border border-white/10 rounded-md text-[10px] font-bold text-slate-400 whitespace-nowrap opacity-0 pointer-events-none group-hover/tooltip:opacity-100 transition-opacity duration-200 shadow-xl z-30">
+                        Profile not available
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>

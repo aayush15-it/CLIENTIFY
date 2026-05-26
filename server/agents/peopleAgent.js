@@ -5,8 +5,8 @@ async function peopleAgent(company, category, searchContext) {
   console.log('   \u2192 Searching for real decision makers...')
 
   const [leaderSearch, linkedinSearch] = await Promise.all([
-    webSearch(`${searchContext} CMO "chief marketing officer" OR "VP marketing" OR "head of marketing" OR "brand director" 2024 2025`),
-    webSearch(`${company} marketing head brand manager LinkedIn site:linkedin.com 2024 2025`)
+    webSearch(`${company} ${category} leadership team executives Founder CEO CTO CMO VP Growth Head Sales`),
+    webSearch(`site:linkedin.com/in/ "${company}" (CEO OR Founder OR CMO OR CTO OR "VP" OR "Head")`)
   ])
 
   const res = await getChatCompletion({
@@ -21,13 +21,13 @@ STRICT CONTACT INTELLIGENCE RULES:
 - ONLY include people who are CONFIRMED in the search results provided.
 - Use the EXACT job titles found in search results.
 - NEVER invent or guess people who are not mentioned in the search results.
-- Focus on these GTM roles: Founder, CEO, CTO, Marketing Head, Growth Lead, Partnerships Manager, Procurement Head.
+- Focus on these GTM roles: Founder, CEO, CTO, Marketing Head/CMO, Growth Lead/VP Sales, Partnerships Manager, Procurement Head.
 - DO NOT include unrelated roles.
 
 LINKEDIN URL RULES:
-- Always format as: https://linkedin.com/in/firstname-lastname
+- Always format as: https://linkedin.com/in/firstname-lastname or matching the real link snippet.
 - The URL must be based on the real person's name found in search results.
-- If LinkedIn URL cannot be verified, set to "Publicly unavailable".
+- If LinkedIn URL cannot be verified or found, set to "Publicly unavailable".
 
 EMAIL RULES:
 - Generate pattern-based email: firstname.lastname@companydomain.com
@@ -40,9 +40,14 @@ PHONE RULES:
 - If not found, set to "Publicly unavailable".
 - NEVER fabricate phone numbers.
 
+VERIFICATION RULES:
+- Set "verified" (boolean) to true if a LinkedIn profile URL is found in the search results or snippet for that person. Otherwise set to false.
+- Also output "verified_contact": "verified" or "unverified" accordingly.
+
 DATA QUALITY:
 - If fewer than 3 people are found in search results, return only those found.
 - NEVER pad the list with invented contacts.
+- Deduplicate list strictly by name.
 - Precision over quantity.`
       },
       {
@@ -74,7 +79,8 @@ Return ONLY this JSON with no extra text:
       "name": "real full name exactly as found in search results",
       "title": "their exact current job title from search results",
       "relevance": "one specific sentence explaining why a GTM sales platform should target this person",
-      "linkedin": "https://linkedin.com/in/firstname-lastname",
+      "linkedin": "https://linkedin.com/in/profile-name",
+      "verified": true,
       "email": "firstname.lastname@companydomain.com",
       "email_confidence": "pattern-based",
       "phone": "Publicly unavailable",
