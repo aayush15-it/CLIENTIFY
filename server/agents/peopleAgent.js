@@ -1,8 +1,5 @@
-require('dotenv').config()
-const Groq = require('groq-sdk')
+const { getChatCompletion } = require('../utils/aiClient')
 const { webSearch } = require('../utils/searchClient')
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
 async function peopleAgent(company, category, searchContext) {
   console.log('   \u2192 Searching for real decision makers...')
@@ -12,7 +9,7 @@ async function peopleAgent(company, category, searchContext) {
     webSearch(`${company} marketing head brand manager LinkedIn site:linkedin.com 2024 2025`)
   ])
 
-  const res = await groq.chat.completions.create({
+  const res = await getChatCompletion({
     model: 'llama-3.1-8b-instant',
     messages: [
       {

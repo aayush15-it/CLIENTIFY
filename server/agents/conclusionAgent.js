@@ -1,7 +1,4 @@
-require('dotenv').config()
-const Groq = require('groq-sdk')
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+const { getChatCompletion } = require('../utils/aiClient')
 
 async function conclusionAgent(company, research, people, outreach) {
   const competitors    = research?.competitors || []
@@ -18,7 +15,7 @@ async function conclusionAgent(company, research, people, outreach) {
   const sentimentGood = market.consumer_sentiment === 'positive'
   const score         = market.perception_score || 5
 
-  const res = await groq.chat.completions.create({
+  const res = await getChatCompletion({
     model: 'llama-3.3-70b-versatile',
     messages: [
       {

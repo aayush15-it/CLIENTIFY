@@ -1,8 +1,5 @@
-require('dotenv').config()
-const Groq = require('groq-sdk')
+const { getChatCompletion } = require('../utils/aiClient')
 const { webSearch } = require('../utils/searchClient')
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
 function safeParseJSON(text) {
   try {
@@ -45,7 +42,7 @@ async function validateAgent(company, category) {
   }
 
   try {
-   const res = await groq.chat.completions.create({
+    const res = await getChatCompletion({
       // UPGRADE 1: Use the much smarter 70B model for validation
       model: 'llama-3.3-70b-versatile', 
       messages: [

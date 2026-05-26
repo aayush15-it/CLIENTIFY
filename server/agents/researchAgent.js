@@ -1,8 +1,5 @@
-require('dotenv').config()
-const Groq = require('groq-sdk')
+const { getChatCompletion } = require('../utils/aiClient')
 const { webSearch, getNews } = require('../utils/searchClient')
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
 function safeParseJSON(text) {
   try {
@@ -30,7 +27,7 @@ function safeParseJSON(text) {
 
 async function askGroq(system, user) {
   try {
-    const res = await groq.chat.completions.create({
+    const res = await getChatCompletion({
       model: 'llama-3.1-8b-instant',
       messages: [
         { role: 'system', content: system },
