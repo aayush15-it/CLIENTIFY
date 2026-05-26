@@ -28,25 +28,40 @@ function safeParseJSON(text) {
 }
 
 async function discoverAgent(industry) {
-  console.log(`   → Discovering prospects and events for industry: ${industry}`)
+  console.log(`   \u2192 Discovering prospects and events for industry: ${industry}`)
 
   let companyResults = ''
   let eventResults = ''
 
   try {
     const results = await Promise.all([
-      webSearch(`${industry} top active companies brands startup 2024 2025`),
-      webSearch(`${industry} industry conferences exhibitions summits events 2024 2025 2026`)
+      webSearch(`${industry} top active consumer brands product companies 2024 2025`),
+      webSearch(`${industry} industry conferences trade shows expos summits 2025 2026`)
     ])
     companyResults = results[0] || ''
     eventResults = results[1] || ''
   } catch(e) {
-    console.error('   → Discovery search error:', e.message)
+    console.error('   \u2192 Discovery search error:', e.message)
   }
 
-  const systemPrompt = `You are a B2B growth strategist and business development AI.
-Your job is to analyze web search results and discover prospects and upcoming events for a given industry.
-Return ONLY valid JSON. No backticks. No markdown. No text before or after the JSON.`
+  const systemPrompt = `You are a production-grade B2B market intelligence engine for StepOne, a brand and experiential marketing agency.
+Your job is to discover REAL, OPERATIONAL companies and REAL upcoming events for a given industry.
+Return ONLY valid JSON. No backticks. No markdown. No text before or after the JSON.
+
+STRICT FILTERING RULES:
+- ONLY include actual operational product/service companies and active brands.
+- Prioritize: consumer brands, product companies, electronics manufacturers, fast-growing startups, D2C brands, SaaS companies, enterprise companies.
+- NEVER include venture capital firms (Sequoia, Accel, A16Z, Tiger Global, etc.).
+- NEVER include startup accelerators (Y Combinator, Techstars, etc.).
+- NEVER include media platforms, news websites, or influencers.
+- NEVER include investment banks or hedge funds.
+- Every company MUST be a potential StepOne client for experiential marketing, branding, campaigns, activations, or events.
+
+DATA QUALITY RULES:
+- NEVER fabricate company names or events.
+- NEVER generate generic rationales. Each rationale must reference a specific recent development (product launch, funding, expansion, campaign, hiring, AI adoption, rebrand, event participation).
+- If information is uncertain, say so honestly.
+- Prefer precision over quantity.`
 
   const userPrompt = `Analyze the target industry: "${industry}"
 Use these search results to extract prospects and upcoming events.
@@ -58,10 +73,17 @@ EVENT SEARCH RESULTS:
 ${eventResults || 'Use your knowledge about major events in this industry.'}
 
 STRICT INSTRUCTIONS:
-1. Identify a minimum of 10 real companies (brands) active in this industry.
-2. For each company, provide a brief rationale explaining why StepOne (a brand and marketing agency) should target them and why now is a good opportunity (e.g. rebranding, Gen Z expansion, launch, marketing spend increase).
-3. Find upcoming real events in this industry and predict which of the discovered companies will likely attend or sponsor them.
-4. Do not invent fake companies or events. If search results are limited, use well-known established entities.
+1. Identify a minimum of 10 REAL companies (brands/product companies) active in this industry.
+2. Each company MUST include:
+   - name: exact company name
+   - segment: their specific sub-category or niche
+   - hq: headquarters location (city, country)
+   - recent_activity: ONE specific recent development (product launch, funding, expansion, campaign, hiring surge, AI initiative, partnership)
+   - rationale: 2 sentences explaining why StepOne should target them NOW, tied to the recent_activity
+   - priority_score: strategic priority from 1 to 10
+3. DO NOT include VCs, accelerators, media outlets, or influencers.
+4. Find REAL upcoming events with exact dates and locations.
+5. For events, predict which discovered companies are likely to attend based on their recent activity.
 
 Return ONLY this JSON structure:
 {
@@ -69,17 +91,20 @@ Return ONLY this JSON structure:
     {
       "name": "Company Name",
       "segment": "Sub-category or niche",
-      "rationale": "Why we should target them and why now is a good opportunity (2 sentences)"
+      "hq": "City, Country",
+      "recent_activity": "One specific recent development",
+      "rationale": "Why StepOne should target them now (2 sentences tied to recent activity)",
+      "priority_score": 8
     }
-    // List at least 10 prospects
   ],
   "events": [
     {
       "name": "Event Name",
-      "date": "Month Year or Exact Date",
+      "date": "Exact dates or Month Year",
       "location": "City, Country or Virtual",
-      "description": "1 sentence description of what the event is",
-      "predicted_attendees": "Comma-separated list of predicted companies attending (e.g., Company A, Company B)"
+      "description": "Official positioning of the event in 1 sentence",
+      "why_attend": "Why StepOne should attend this event (1 sentence)",
+      "predicted_attendees": "Company A, Company B, Company C"
     }
   ]
 }`
@@ -92,8 +117,8 @@ Return ONLY this JSON structure:
         { role: 'user',   content: userPrompt }
       ],
       response_format: { type: "json_object" },
-      max_tokens: 3000,
-      temperature: 0.3
+      max_tokens: 3500,
+      temperature: 0.25
     })
 
     const text = res.choices[0]?.message?.content || ''
@@ -105,7 +130,7 @@ Return ONLY this JSON structure:
     }
     return defaults
   } catch(err) {
-    console.error('   → Discovery AI failed:', err.message)
+    console.error('   \u2192 Discovery AI failed:', err.message)
     return { prospects: [], events: [] }
   }
 }

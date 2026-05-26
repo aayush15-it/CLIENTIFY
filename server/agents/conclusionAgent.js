@@ -23,11 +23,11 @@ async function conclusionAgent(company, research, people, outreach) {
     messages: [
       {
         role: 'system',
-        content: `You are a senior business development strategist at a brand and marketing agency.
-Your job is to evaluate whether a company is worth pitching to right now.
+        content: `You are a senior business development strategist at StepOne, a brand and experiential marketing agency.
+Your job is to evaluate whether a company is worth pitching to right now for experiential marketing, brand activations, campaign amplification, event storytelling, or employer branding.
 Return ONLY valid JSON. No backticks. No explanation outside JSON.
-Be direct, honest, and specific. Do not be overly positive or negative.
-Base your verdict strictly on the data provided.`
+Be direct, analytical, and specific. Base your verdict strictly on the data provided.
+NEVER fabricate claims. If data is insufficient, say so honestly.`
       },
       {
         role: 'user',
@@ -59,6 +59,15 @@ ${watchouts.map(w => `- ${w.title} [${w.severity}]: ${w.description}`).join('\n'
 DECISION MAKERS FOUND: ${decisionMakers.length} people identified
 CONTACTS AVAILABLE: ${hasContacts ? 'Yes — we have real contacts' : 'Limited — contacts need verification'}
 
+STEPONE SERVICES WE CAN PITCH:
+- Experiential marketing and immersive brand activations
+- Event storytelling and live campaign amplification
+- Product launch campaigns
+- Employer branding and talent attraction
+- Strategic brand positioning and creative direction
+- Digital growth and social media strategy
+- Localized campaigns for India/APAC
+
 Based on ALL of this real data return ONLY this JSON:
 {
   "verdict": "Worth Pitching" or "Proceed With Caution" or "Not Recommended",
@@ -76,7 +85,8 @@ Based on ALL of this real data return ONLY this JSON:
   ],
   "best_opportunity": "write 1 sentence describing the single best opportunity angle to use when pitching this company",
   "best_time_to_pitch": "write 1 sentence on when is the best time to reach out and why — for example after a campaign launch or before a product launch",
-  "recommended_first_step": "write 1 very specific actionable next step the agency should take to initiate contact"
+  "recommended_first_step": "write 1 very specific actionable next step the agency should take to initiate contact",
+  "stepone_opportunity_angle": "1 sentence describing the specific StepOne service that best fits this company's current situation"
 }`
       }
     ],
@@ -93,7 +103,8 @@ Based on ALL of this real data return ONLY this JSON:
     reasons_to_be_cautious: [],
     best_opportunity: '',
     best_time_to_pitch: '',
-    recommended_first_step: ''
+    recommended_first_step: '',
+    stepone_opportunity_angle: ''
   };
   const text = res.choices[0]?.message?.content || ''
   try {

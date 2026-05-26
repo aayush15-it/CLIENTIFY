@@ -216,10 +216,26 @@ export default function App() {
                     <div>
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="font-extrabold text-white text-lg">{company.name}</h3>
-                        <span className="text-[10px] bg-indigo-500/20 text-[#00D4FF] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                          {company.segment || 'Prospect'}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          {company.priority_score && (
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                              company.priority_score >= 8 ? 'bg-emerald-500/20 text-emerald-400' : 
+                              company.priority_score >= 5 ? 'bg-amber-500/20 text-amber-400' : 'bg-red-500/20 text-red-400'
+                            }`}>
+                              {company.priority_score}/10
+                            </span>
+                          )}
+                          <span className="text-[10px] bg-indigo-500/20 text-[#00D4FF] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            {company.segment || 'Prospect'}
+                          </span>
+                        </div>
                       </div>
+                      {company.hq && (
+                        <p className="text-[10px] text-slate-500 font-mono uppercase tracking-wider mb-1">📍 {company.hq}</p>
+                      )}
+                      {company.recent_activity && (
+                        <p className="text-[10px] text-purple-300/80 mb-2 italic">⚡ {company.recent_activity}</p>
+                      )}
                       <p className="text-slate-300 text-xs leading-relaxed mb-4">{company.rationale}</p>
                     </div>
 
@@ -264,8 +280,11 @@ export default function App() {
                         </span>
                       </div>
                       <div className="text-slate-400 text-xs mb-3 font-semibold uppercase">{event.location}</div>
-                      <p className="text-slate-300 text-xs leading-relaxed mb-4">{event.description}</p>
-                      
+                      <p className="text-slate-300 text-xs leading-relaxed mb-2">{event.description}</p>
+                      {event.why_attend && (
+                        <p className="text-[10px] text-[#00D4FF]/80 mb-4 italic">🎯 {event.why_attend}</p>
+                      )}
+                      {!event.why_attend && <div className="mb-4" />}
                       <div className="mt-auto pt-3 border-t border-white/5">
                         <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Predicted Attendees:</span>
                         <div className="flex flex-wrap gap-1.5">

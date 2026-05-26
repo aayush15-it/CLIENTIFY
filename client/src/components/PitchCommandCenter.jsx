@@ -60,6 +60,37 @@ export default function PitchCommandCenter({ conclusion, market }) {
         </div>
 
       </div>
+
+      {/* StepOne Opportunity Angle */}
+      {conclusion?.stepone_opportunity_angle && (
+        <div className="mt-6 relative z-10 bg-gradient-to-r from-[#00D4FF]/10 to-purple-500/10 border border-[#00D4FF]/20 rounded-2xl p-5">
+          <h4 className="text-xs font-bold tracking-widest text-[#00D4FF] uppercase mb-2">🎯 StepOne Opportunity Angle</h4>
+          <p className="text-sm text-white/90 leading-relaxed font-medium">{conclusion.stepone_opportunity_angle}</p>
+        </div>
+      )}
+
+      {/* Recommended Actions */}
+      <div className="mt-6 relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4">
+        {conclusion?.best_opportunity && (
+          <div className="bg-[#0A1428]/50 border border-emerald-500/20 rounded-xl p-4">
+            <h4 className="text-[10px] font-bold tracking-widest text-emerald-400 uppercase mb-2">Best Opportunity</h4>
+            <p className="text-xs text-slate-300 leading-relaxed">{conclusion.best_opportunity}</p>
+          </div>
+        )}
+        {conclusion?.best_time_to_pitch && (
+          <div className="bg-[#0A1428]/50 border border-amber-500/20 rounded-xl p-4">
+            <h4 className="text-[10px] font-bold tracking-widest text-amber-400 uppercase mb-2">Best Time to Pitch</h4>
+            <p className="text-xs text-slate-300 leading-relaxed">{conclusion.best_time_to_pitch}</p>
+          </div>
+        )}
+        {conclusion?.recommended_first_step && (
+          <div className="bg-[#0A1428]/50 border border-[#00D4FF]/20 rounded-xl p-4">
+            <h4 className="text-[10px] font-bold tracking-widest text-[#00D4FF] uppercase mb-2">Recommended First Step</h4>
+            <p className="text-xs text-slate-300 leading-relaxed">{conclusion.recommended_first_step}</p>
+          </div>
+        )}
+      </div>
+
     </section>
   );
 }
