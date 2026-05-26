@@ -55,16 +55,15 @@ CLIENTIFY/
 
 ### Run the Application
 
-Backend:
+Backend (from the root directory):
 
-```id="bd4t0m"
-cd server
+```bash
 npm run dev
 ```
 
-Frontend:
+Frontend (from the client directory):
 
-```id="c6m8hy"
+```bash
 cd client
 npm run dev
 ```

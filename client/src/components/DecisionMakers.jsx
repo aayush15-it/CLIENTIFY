@@ -67,14 +67,27 @@ export default function DecisionMakers({ people, outreach }) {
 
             {/* Expandable Message Box */}
             {activeMessage.index === i && (
-              <div className="mt-4 p-3 bg-black/40 rounded-lg border border-white/5 relative group/copy animate-in slide-in-from-top-2">
-                <p className="text-xs text-slate-300 pr-8">
-                  {activeMessage.type === 'email' 
-                    ? (outreach.email_subject || "No email subject generated.") 
-                    : (outreach.linkedin_message || "No LinkedIn message generated.")}
-                </p>
+              <div className="mt-4 p-3 bg-black/40 rounded-lg border border-white/5 relative group/copy animate-in slide-in-from-top-2 text-left">
+                {activeMessage.type === 'email' ? (
+                  <div className="text-xs space-y-2 pr-8">
+                    <div>
+                      <span className="font-bold text-[#00D4FF]">Subject:</span> {outreach.email_subject || 'No subject'}
+                    </div>
+                    <div className="border-t border-white/5 pt-2 whitespace-pre-line text-slate-300 leading-relaxed font-normal">
+                      {outreach.email_body || 'No body generated.'}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-300 pr-8 whitespace-pre-line leading-relaxed font-normal">
+                    {outreach.linkedin_message || "No LinkedIn message generated."}
+                  </p>
+                )}
                 <button 
-                  onClick={() => handleCopy(activeMessage.type === 'email' ? outreach.email_subject : outreach.linkedin_message)}
+                  onClick={() => handleCopy(
+                    activeMessage.type === 'email' 
+                      ? `Subject: ${outreach.email_subject}\n\n${outreach.email_body}` 
+                      : outreach.linkedin_message
+                  )}
                   className="absolute top-2 right-2 p-1.5 bg-white/10 hover:bg-white/20 rounded-md text-white transition-colors cursor-pointer"
                   title="Copy to clipboard"
                 >
