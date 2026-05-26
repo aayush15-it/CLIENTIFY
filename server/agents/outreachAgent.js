@@ -3,25 +3,36 @@ const Groq = require('groq-sdk')
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
-async function outreachAgent(company, people, research) {
-  const dm          = people?.decision_makers?.[0] || { name: 'Marketing Head', title: 'CMO' }
+function safeParseJSON(text) {
+  if (!text) return null
+  try {
+    return JSON.parse(text.trim())
+  } catch(e) {
+    try {
+      const match = text.match(/\{[\s\S]*\}/)
+      if (match) {
+        return JSON.parse(match[0].trim())
+      }
+    } catch(e2) {
+      console.error('JSON parse failed in outreachAgent:', e2.message)
+    }
+    return null
+  }
+}
+
+async function generateSingleOutreach(company, dm, research) {
   const dmName      = dm.name || 'Marketing Head'
   const firstName   = dmName.split(' ')[0] || 'there'
   const campaign    = research?.activity?.[0]?.name || 'recent initiative'
   const campaignDesc = research?.activity?.[0]?.description || ''
   const positioning = research?.overview?.positioning || ''
-  const watchout    = research?.watchouts?.[0]?.title || ''
   const competitor  = research?.competitors?.[0]?.name || 'competitors'
   const marketShift = research?.market?.recent_shifts || ''
   const companyProper = company.charAt(0).toUpperCase() + company.slice(1)
 
-  const res = await groq.chat.completions.create({
-    model: 'llama-3.1-8b-instant',
-    messages: [
-      {
-        role: 'system',
-        content: `You are a senior B2B outreach strategist writing on behalf of StepOne, a brand and experiential marketing agency.
-Return ONLY valid JSON. No backticks. No explanation outside JSON.
+  const systemPrompt = `You are a senior B2B outreach strategist writing on behalf of StepOne, a brand and experiential marketing agency.
+Your job is to write a highly personalized cold outreach email and LinkedIn message targeting a specific decision maker.
+You must return ONLY valid JSON matching the requested structure. No markdown backticks. No conversational filler.
 
 STEPONE CAPABILITIES TO REFERENCE:
 - Experiential marketing and immersive brand activations
@@ -47,10 +58,8 @@ TONE:
 - Strategic and consultative, not salesy.
 - Respectful and peer-level, not subservient.
 - Frame everything as opportunity, never mention weaknesses or risks directly.`
-      },
-      {
-        role: 'user',
-        content: `Write highly personalized outreach for this specific senior person:
+
+  const userPrompt = `Write highly personalized outreach for this specific senior person:
 
 Person details:
 - Full name: ${dmName}
@@ -91,29 +100,55 @@ Return ONLY this JSON:
   "email_subject": "the specific email subject line",
   "email_body": "the full email body under 150 words with proper paragraphs"
 }`
-      }
-    ],
-    max_tokens: 800,
-    temperature: 0.6
-  })
 
   const defaults = {
     linkedin_message: '',
     email_subject: '',
     email_body: ''
-  };
-  const text = res.choices[0]?.message?.content || ''
+  }
+
   try {
-    const parsed = JSON.parse(text);
-    return { ...defaults, ...parsed };
-  } catch(e) {
-    const match = text.match(/\{[\s\S]*\}/)
-    try {
-      const parsed = match ? JSON.parse(match[0]) : null;
-      return parsed ? { ...defaults, ...parsed } : { ...defaults, email_body: text };
-    } catch(e2) {
-      return { ...defaults, email_body: text };
+    const res = await groq.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user',   content: userPrompt }
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 800,
+      temperature: 0.6
+    })
+
+    const text = res.choices[0]?.message?.content || ''
+    const parsed = safeParseJSON(text)
+    return parsed ? { ...defaults, ...parsed } : defaults
+  } catch (err) {
+    console.error(`Error generating outreach for ${dmName}:`, err.message)
+    return defaults
+  }
+}
+
+async function outreachAgent(company, people, research) {
+  console.log(`   → Generating personalized outreach for all decision makers...`)
+  
+  const dms = people?.decision_makers && people.decision_makers.length > 0
+    ? people.decision_makers
+    : [{ name: 'Marketing Head', title: 'CMO', relevance: 'Brand decision maker' }]
+
+  // Generate outreach for each decision maker in parallel
+  const outreachPromises = dms.map(async (dm) => {
+    const outreach = await generateSingleOutreach(company, dm, research)
+    return {
+      ...dm,
+      outreach
     }
+  })
+
+  const enrichedDMs = await Promise.all(outreachPromises)
+
+  return {
+    ...people,
+    decision_makers: enrichedDMs
   }
 }
 

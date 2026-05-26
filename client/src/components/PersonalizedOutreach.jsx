@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Send, Copy, Check, Mail, MessageSquare } from 'lucide-react';
 
-export default function PersonalizedOutreach({ outreach }) {
+export default function PersonalizedOutreach({ outreach, dmName, dmTitle }) {
   const [copied, setCopied] = useState(null);
 
   const handleCopy = (text, type) => {
@@ -20,7 +20,14 @@ export default function PersonalizedOutreach({ outreach }) {
       <div className="flex items-center justify-between mb-6 border-b border-emerald-500/20 pb-4">
         <div className="flex items-center gap-3">
           <Send className="w-6 h-6 text-emerald-400" />
-          <h2 className="text-xl font-semibold text-white">Personalized Outreach</h2>
+          <div>
+            <h2 className="text-xl font-semibold text-white">Personalized Outreach</h2>
+            {dmName && (
+              <p className="text-xs text-slate-400 mt-0.5">
+                Targeted at: <span className="text-emerald-400 font-semibold">{dmName}</span> ({dmTitle || 'Key Executive'})
+              </p>
+            )}
+          </div>
         </div>
       </div>
 

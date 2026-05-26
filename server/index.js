@@ -112,13 +112,14 @@ app.post('/api/analyze', async (req, res) => {
     const people = await peopleAgent(company, category, searchContext)
 
     console.log('Step 3: Outreach...')
-    const outreach = await outreachAgent(company, people, research)
+    const enrichedPeople = await outreachAgent(company, people, research)
+    const primaryOutreach = enrichedPeople.decision_makers?.[0]?.outreach || {}
 
     console.log('Step 4: Tracking...')
     const tracking = await trackingAgent(company)
 
     console.log('Step 5: Conclusion...')
-    const conclusion = await conclusionAgent(company, research, people, outreach)
+    const conclusion = await conclusionAgent(company, research, enrichedPeople, primaryOutreach)
 
     console.log('All done!')
 
@@ -132,8 +133,8 @@ app.post('/api/analyze', async (req, res) => {
       activity:    research.activity    || [],
       events:      research.events      || [],
       watchouts:   research.watchouts   || [],
-      people:      people               || { decision_makers: [] },
-      outreach:    outreach             || {},
+      people:      enrichedPeople       || { decision_makers: [] },
+      outreach:    primaryOutreach,
       tracking:    tracking             || {},
       conclusion:  conclusion           || {}
     })

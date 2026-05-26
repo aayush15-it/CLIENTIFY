@@ -22,6 +22,7 @@ export default function App() {
   const [companyData, setCompanyData] = useState(null)
   const [companyError, setCompanyError] = useState('')
   const [activeTab, setActiveTab] = useState('pitch')
+  const [selectedDMIndex, setSelectedDMIndex] = useState(0)
 
   const companyResultsRef = useRef(null)
 
@@ -77,6 +78,7 @@ export default function App() {
       }
 
       setCompanyData(result)
+      setSelectedDMIndex(0)
       setActiveTab('pitch')
 
       // Smooth scroll to results
@@ -423,10 +425,18 @@ export default function App() {
             {activeTab === 'outreach' && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in slide-in-from-bottom-4 duration-300">
                 <div className="lg:col-span-4">
-                  <DecisionMakers people={companyData.people} outreach={companyData.outreach} />
+                  <DecisionMakers 
+                    people={companyData.people} 
+                    selectedDMIndex={selectedDMIndex}
+                    setSelectedDMIndex={setSelectedDMIndex}
+                  />
                 </div>
                 <div className="lg:col-span-8 space-y-8">
-                  <PersonalizedOutreach outreach={companyData.outreach} />
+                  <PersonalizedOutreach 
+                    outreach={companyData.people?.decision_makers?.[selectedDMIndex]?.outreach} 
+                    dmName={companyData.people?.decision_makers?.[selectedDMIndex]?.name}
+                    dmTitle={companyData.people?.decision_makers?.[selectedDMIndex]?.title}
+                  />
                   <OutreachTracking tracking={companyData.tracking} />
                 </div>
               </div>

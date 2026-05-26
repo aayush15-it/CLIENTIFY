@@ -87,6 +87,7 @@ Return ONLY this JSON with no extra text:
 }`
       }
     ],
+    response_format: { type: "json_object" },
     max_tokens: 1000,
     temperature: 0.15
   })
